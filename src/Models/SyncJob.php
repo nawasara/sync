@@ -77,7 +77,7 @@ class SyncJob extends Model
     {
         $finishedAt = now();
         $duration = $this->started_at
-            ? $finishedAt->diffInMilliseconds($this->started_at)
+            ? (int) abs($finishedAt->diffInMilliseconds($this->started_at))
             : null;
 
         $this->update([
@@ -93,7 +93,7 @@ class SyncJob extends Model
     {
         $finishedAt = now();
         $duration = $this->started_at
-            ? $finishedAt->diffInMilliseconds($this->started_at)
+            ? (int) abs($finishedAt->diffInMilliseconds($this->started_at))
             : null;
 
         $this->update([

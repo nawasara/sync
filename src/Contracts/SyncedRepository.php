@@ -38,25 +38,25 @@ interface SyncedRepository
     public function all(array $filters = []): Collection;
 
     /**
-     * Dispatch create job. Returns SyncJob tracker for UI feedback.
+     * Dispatch create job. Returns SyncJob tracker for UI feedback (atau null).
      */
-    public function create(array $data): SyncJob;
+    public function create(array $data): ?SyncJob;
 
     /**
      * Dispatch update job.
      */
-    public function update(string|int $id, array $data): SyncJob;
+    public function update(string|int $id, array $data): ?SyncJob;
 
     /**
      * Dispatch delete job.
      */
-    public function delete(string|int $id): SyncJob;
+    public function delete(string|int $id): ?SyncJob;
 
     /**
      * Force-refresh dari external API ke DB.
      * Dispatch sync job, returns tracker.
      */
-    public function syncNow(): SyncJob;
+    public function syncNow(): ?SyncJob;
 
     /**
      * When was the last successful full sync?
