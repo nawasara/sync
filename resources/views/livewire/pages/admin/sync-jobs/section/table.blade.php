@@ -24,6 +24,7 @@
 
     <x-nawasara-ui::filter-bar searchPlaceholder="Cari target, action, error..." searchModel="search">
         <x-nawasara-ui::filter-dropdown label="Service" model="serviceFilter" :items="$this->services" />
+        <x-nawasara-ui::filter-dropdown label="User" model="userFilter" :items="$this->userOptions" />
 
         <x-slot:chips>
             @if ($statusFilter)
@@ -32,13 +33,16 @@
             @if ($serviceFilter)
                 <x-nawasara-ui::filter-chip label="Service: {{ $serviceFilter }}" model="serviceFilter" />
             @endif
+            @if ($userFilter !== '')
+                <x-nawasara-ui::filter-chip label="User: {{ $this->userOptions[$userFilter] ?? $userFilter }}" model="userFilter" />
+            @endif
             @if ($search)
                 <x-nawasara-ui::filter-chip label="Cari: {{ $search }}" model="search" />
             @endif
         </x-slot:chips>
     </x-nawasara-ui::filter-bar>
 
-    <x-nawasara-ui::table :headers="['Service', 'Action', 'Target', 'Status', 'Duration', 'Triggered', '']" title="Sync Jobs">
+    <x-nawasara-ui::table :headers="['Service', 'Action', 'Target', 'User', 'Status', 'Duration', 'Triggered', '']" title="Sync Jobs">
         <x-slot:table>
             @forelse ($this->jobs as $job)
                 <tr>
@@ -48,14 +52,23 @@
                             <span class="text-xs text-gray-500 dark:text-neutral-400">/ {{ $job->instance }}</span>
                         @endif
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm font-mono text-gray-700 dark:text-neutral-300">
-                        {{ $job->action }}
+                    <td class="px-6 py-3 whitespace-nowrap text-sm">
+                        <div class="text-gray-800 dark:text-neutral-200">{{ $job->actionLabel() }}</div>
+                        <div class="text-xs text-gray-400 font-mono">{{ $job->action }}</div>
                     </td>
                     <td class="px-6 py-3 text-sm text-gray-600 dark:text-neutral-400 max-w-xs truncate">
                         @if ($job->target_id)
                             <span class="font-mono">{{ $job->target_id }}</span>
                         @else
                             <span class="text-gray-400">—</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm">
+                        @if ($job->triggeredByUser)
+                            <div class="text-gray-700 dark:text-neutral-300">{{ $job->triggeredByUser->name }}</div>
+                            <div class="text-xs text-gray-400 truncate max-w-[12rem]">{{ $job->triggeredByUser->email }}</div>
+                        @else
+                            <span class="text-xs italic text-gray-400">system</span>
                         @endif
                     </td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm">
@@ -98,7 +111,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-neutral-400">
+                    <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-neutral-400">
                         Belum ada sync job.
                     </td>
                 </tr>
@@ -116,9 +129,21 @@
             @php $j = $this->detail; @endphp
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="col-span-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900">
+                        <div class="text-xs text-blue-700 dark:text-blue-400 uppercase mb-1">Action</div>
+                        <div class="font-semibold text-gray-800 dark:text-neutral-200">{{ $j->actionLabel() }}</div>
+                        <div class="text-xs text-gray-500 font-mono mt-0.5">{{ $j->service }}.{{ $j->action }}</div>
+                    </div>
                     <div><span class="text-gray-500">Service:</span> <span class="font-medium">{{ $j->service }}</span></div>
                     <div><span class="text-gray-500">Instance:</span> <span class="font-medium">{{ $j->instance ?? '—' }}</span></div>
-                    <div><span class="text-gray-500">Action:</span> <span class="font-mono">{{ $j->action }}</span></div>
+                    <div class="col-span-2"><span class="text-gray-500">User:</span>
+                        @if ($j->triggeredByUser)
+                            <span class="font-medium">{{ $j->triggeredByUser->name }}</span>
+                            <span class="text-xs text-gray-500">({{ $j->triggeredByUser->email }})</span>
+                        @else
+                            <span class="italic text-gray-400">system / scheduler</span>
+                        @endif
+                    </div>
                     <div><span class="text-gray-500">Status:</span> <span class="font-medium">{{ ucfirst($j->status) }}</span></div>
                     <div><span class="text-gray-500">Target:</span> <span class="font-mono text-xs">{{ $j->target_type }}#{{ $j->target_id }}</span></div>
                     <div><span class="text-gray-500">Attempts:</span> <span>{{ $j->attempts }}</span></div>
@@ -148,7 +173,12 @@
 
                 @if (! empty($j->payload))
                     <div>
-                        <h4 class="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-1">Payload</h4>
+                        <h4 class="text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-1 flex items-center gap-2">
+                            Payload
+                            <span class="text-xs font-normal text-gray-400" title="Field sensitif (password, token, key) di-mask sebagai *** sebelum disimpan">
+                                <x-lucide-shield class="size-3 inline" /> sensitive masked
+                            </span>
+                        </h4>
                         <pre class="text-xs bg-gray-50 dark:bg-neutral-900 p-3 rounded overflow-x-auto">{{ json_encode($j->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                     </div>
                 @endif

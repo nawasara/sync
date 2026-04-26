@@ -15,6 +15,7 @@ class Table extends Component
 
     public string $serviceFilter = '';
     public string $statusFilter = '';
+    public string $userFilter = '';
     public string $search = '';
 
     public ?int $detailId = null;
@@ -24,13 +25,14 @@ class Table extends Component
         return [
             'serviceFilter' => ['except' => '', 'as' => 'service'],
             'statusFilter' => ['except' => '', 'as' => 'status'],
+            'userFilter' => ['except' => '', 'as' => 'user'],
             'search' => ['except' => ''],
         ];
     }
 
     public function updated($name): void
     {
-        if (in_array($name, ['serviceFilter', 'statusFilter', 'search'])) {
+        if (in_array($name, ['serviceFilter', 'statusFilter', 'userFilter', 'search'])) {
             $this->resetPage();
         }
     }
@@ -39,8 +41,16 @@ class Table extends Component
     public function jobs()
     {
         return SyncJob::query()
+            ->with('triggeredByUser:id,name,email')
             ->when($this->serviceFilter, fn ($q) => $q->where('service', $this->serviceFilter))
             ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
+            ->when($this->userFilter !== '', function ($q) {
+                if ($this->userFilter === 'system') {
+                    $q->whereNull('triggered_by');
+                } else {
+                    $q->where('triggered_by', (int) $this->userFilter);
+                }
+            })
             ->when($this->search, function ($q) {
                 $q->where(function ($qq) {
                     $qq->where('target_id', 'like', '%'.$this->search.'%')
@@ -50,6 +60,32 @@ class Table extends Component
             })
             ->latest()
             ->paginate(25);
+    }
+
+    #[Computed]
+    public function userOptions(): array
+    {
+        // Distinct triggers seen in sync_jobs, plus the standard "system" bucket.
+        $userModel = config('auth.providers.users.model');
+        if (! $userModel) {
+            return ['' => 'Semua User'];
+        }
+
+        $userIds = SyncJob::query()
+            ->whereNotNull('triggered_by')
+            ->distinct()
+            ->pluck('triggered_by')
+            ->all();
+
+        $users = $userIds
+            ? $userModel::query()->whereIn('id', $userIds)->orderBy('name')->get(['id', 'name', 'email'])
+            : collect();
+
+        $opts = ['' => 'Semua User', 'system' => 'System / Scheduler'];
+        foreach ($users as $u) {
+            $opts[(string) $u->id] = $u->name.' ('.$u->email.')';
+        }
+        return $opts;
     }
 
     #[Computed]

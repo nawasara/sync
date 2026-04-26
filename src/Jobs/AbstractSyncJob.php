@@ -51,6 +51,8 @@ abstract class AbstractSyncJob implements ShouldQueue
         }
 
         // Persist tracker row immediately so UI can show "queued" before worker picks it up.
+        // The in-memory $this->payload keeps real values so execute() still works;
+        // only the persisted copy is sanitised.
         $tracker = SyncJob::create([
             'service' => $this->service(),
             'instance' => $this->instance,
@@ -59,7 +61,7 @@ abstract class AbstractSyncJob implements ShouldQueue
             'target_id' => $this->targetId(),
             'expected_hash' => $this->expectedHash,
             'status' => SyncJob::STATUS_QUEUED,
-            'payload' => $this->payload,
+            'payload' => $this->sanitisePayload($this->payload),
             'triggered_by' => $this->triggeredBy,
             'trigger_source' => $this->triggerSource,
         ]);
@@ -68,6 +70,45 @@ abstract class AbstractSyncJob implements ShouldQueue
 
         // Set queue based on action type (realtime vs scheduled)
         $this->onQueue($this->resolveQueue());
+    }
+
+    /**
+     * Keys whose values should be masked when payload is persisted to the
+     * audit table. Subclasses can override to add domain-specific keys
+     * (e.g. api_token, ssh_key). Match is case-insensitive substring.
+     */
+    protected function sensitivePayloadKeys(): array
+    {
+        return ['password', 'secret', 'token', 'api_key', 'private_key', 'ssh_key'];
+    }
+
+    /**
+     * Recursively replace values for sensitive keys with "***" so the
+     * audit row is safe to view but still proves an action happened.
+     */
+    protected function sanitisePayload(array $payload): array
+    {
+        $patterns = $this->sensitivePayloadKeys();
+        $result = [];
+
+        foreach ($payload as $key => $value) {
+            if (is_array($value)) {
+                $result[$key] = $this->sanitisePayload($value);
+                continue;
+            }
+
+            $masked = false;
+            foreach ($patterns as $pattern) {
+                if (stripos((string) $key, $pattern) !== false) {
+                    $masked = true;
+                    break;
+                }
+            }
+
+            $result[$key] = $masked ? '***' : $value;
+        }
+
+        return $result;
     }
 
     public function handle(): void
