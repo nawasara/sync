@@ -1,8 +1,28 @@
 {
     "name": "nawasara/sync",
-    "description": "DB-cached + queue-based sync infrastructure for Nawasara packages (WHM, Cloudflare, Keycloak, etc.)",
+    "description": "Foundation for the DB-cache + queue pattern shared across Nawasara service packages (WHM, Cloudflare, Keycloak, etc.) — sync job tracker, repository contract, snapshot trait, and audit UI.",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "nawasara",
+        "laravel",
+        "queue",
+        "sync",
+        "db-cache",
+        "audit-log",
+        "repository-pattern"
+    ],
+    "authors": [
+        {
+            "name": "Pringgo J. Saputro",
+            "email": "odyinggo@gmail.com",
+            "role": "Lead Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/nawasara/sync/issues",
+        "source": "https://github.com/nawasara/sync"
+    },
     "autoload": {
         "psr-4": {
             "Nawasara\\Sync\\": "src/"
@@ -21,5 +41,7 @@
                 "Nawasara\\Sync\\SyncServiceProvider"
             ]
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
