@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Nawasara\Sync\Events\SyncJobFinalFailed;
 use Nawasara\Sync\Models\SyncJob;
 
 /**
@@ -219,5 +220,14 @@ abstract class AbstractSyncJob implements ShouldQueue
     // Hooks — subclasses can override
     protected function onSuccess(SyncJob $tracker): void {}
     protected function onConflict(SyncJob $tracker): void {}
-    protected function onFinalFailure(SyncJob $tracker, \Throwable $e): void {}
+
+    /**
+     * Default emits SyncJobFinalFailed event so external listeners (e.g.
+     * notification package) can react. Subclasses overriding this MUST
+     * call parent::onFinalFailure() if they want the event still fired.
+     */
+    protected function onFinalFailure(SyncJob $tracker, \Throwable $e): void
+    {
+        SyncJobFinalFailed::dispatch($tracker, $e);
+    }
 }
