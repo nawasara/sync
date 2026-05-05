@@ -3,22 +3,22 @@
     <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4">
         @php
             $cards = [
-                'queued' => ['label' => 'Queued', 'class' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'],
-                'running' => ['label' => 'Running', 'class' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400'],
-                'success' => ['label' => 'Success', 'class' => 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'],
-                'failed' => ['label' => 'Failed', 'class' => 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'],
-                'conflict' => ['label' => 'Conflict', 'class' => 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'],
-                'skipped' => ['label' => 'Skipped', 'class' => 'bg-gray-100 text-gray-700 dark:bg-neutral-700 dark:text-neutral-300'],
+                'queued' => ['label' => 'Queued', 'icon' => 'lucide-circle-dashed', 'color' => 'primary'],
+                'running' => ['label' => 'Running', 'icon' => 'lucide-loader', 'color' => 'info'],
+                'success' => ['label' => 'Success', 'icon' => 'lucide-check-circle', 'color' => 'success'],
+                'failed' => ['label' => 'Failed', 'icon' => 'lucide-x-circle', 'color' => 'danger'],
+                'conflict' => ['label' => 'Conflict', 'icon' => 'lucide-triangle-alert', 'color' => 'warning'],
+                'skipped' => ['label' => 'Skipped', 'icon' => 'lucide-skip-forward', 'color' => 'neutral'],
             ];
         @endphp
         @foreach ($cards as $key => $cfg)
-            <button type="button" wire:click="$set('statusFilter', '{{ $statusFilter === $key ? '' : $key }}')"
-                class="text-left rounded-xl border p-3 transition {{ $statusFilter === $key ? 'border-green-500 ring-2 ring-green-100 dark:ring-green-900/30' : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600' }}">
-                <div class="text-xs font-medium {{ $cfg['class'] }} inline-block px-2 py-0.5 rounded">{{ $cfg['label'] }}</div>
-                <div class="text-2xl font-bold mt-1 text-gray-800 dark:text-neutral-200">
-                    {{ $this->statusCounts[$key] ?? 0 }}
-                </div>
-            </button>
+            <x-nawasara-ui::stat-card
+                :label="$cfg['label']"
+                :value="$this->statusCounts[$key] ?? 0"
+                :icon="$cfg['icon']"
+                :color="$cfg['color']"
+                :active="$statusFilter === $key"
+                wire:click="setStatusFilter('{{ $key }}')" />
         @endforeach
     </div>
 

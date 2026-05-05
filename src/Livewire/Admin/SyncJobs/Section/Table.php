@@ -110,6 +110,15 @@ class Table extends Component
             ->all();
     }
 
+    /**
+     * Toggle behavior: klik card status yg sama → un-filter (kembali "all").
+     * Klik beda → switch ke status itu.
+     */
+    public function setStatusFilter(string $status): void
+    {
+        $this->statusFilter = $this->statusFilter === $status ? '' : $status;
+    }
+
     public function openDetail(int $id): void
     {
         $this->detailId = $id;

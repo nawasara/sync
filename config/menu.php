@@ -4,9 +4,9 @@ $prefix = 'admin/sync';
 
 return [
     [
-        'workspace' => 'settings',
-        'label' => 'Pengaturan',
-        'icon' => 'lucide-settings',
+        'workspace' => 'monitoring',
+        'label' => 'Monitoring',
+        'icon' => 'lucide-activity',
         'url' => '',
         'permission' => 'sync.job.view',
         'submenu' => [

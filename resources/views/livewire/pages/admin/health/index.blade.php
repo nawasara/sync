@@ -14,14 +14,11 @@
             </div>
             <div class="flex items-center gap-2 text-sm">
                 <span class="text-gray-500 dark:text-neutral-400">Window:</span>
-                @foreach ([1 => '1h', 24 => '24h', 168 => '7d'] as $hours => $label)
-                    <button wire:click="setWindow({{ $hours }})"
-                        class="px-3 py-1 rounded {{ $windowHours === $hours
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600' }}">
-                        {{ $label }}
-                    </button>
-                @endforeach
+                <x-nawasara-ui::segmented-control
+                    :options="['1' => '1h', '24' => '24h', '168' => '7d']"
+                    :active="(string) $windowHours"
+                    wire-method="setWindow"
+                    size="sm" />
             </div>
         </div>
 
