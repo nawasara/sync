@@ -1,12 +1,12 @@
 <div>
-    {{-- Status summary cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4">
+    {{-- Status summary cards — clickable filter --}}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
         @php
             $cards = [
                 'queued' => ['label' => 'Queued', 'icon' => 'lucide-circle-dashed', 'color' => 'primary'],
                 'running' => ['label' => 'Running', 'icon' => 'lucide-loader', 'color' => 'info'],
-                'success' => ['label' => 'Success', 'icon' => 'lucide-check-circle', 'color' => 'success'],
-                'failed' => ['label' => 'Failed', 'icon' => 'lucide-x-circle', 'color' => 'danger'],
+                'success' => ['label' => 'Success', 'icon' => 'lucide-circle-check', 'color' => 'success'],
+                'failed' => ['label' => 'Failed', 'icon' => 'lucide-circle-x', 'color' => 'danger'],
                 'conflict' => ['label' => 'Conflict', 'icon' => 'lucide-triangle-alert', 'color' => 'warning'],
                 'skipped' => ['label' => 'Skipped', 'icon' => 'lucide-skip-forward', 'color' => 'neutral'],
             ];
@@ -18,6 +18,7 @@
                 :icon="$cfg['icon']"
                 :color="$cfg['color']"
                 :active="$statusFilter === $key"
+                accent
                 wire:click="setStatusFilter('{{ $key }}')" />
         @endforeach
     </div>
@@ -110,9 +111,28 @@
                     </td>
                 </tr>
             @empty
+                @php
+                    // Detect filter active: kalau ada filter dipasang, empty state-nya
+                    // 'no match', bukan 'no data'. Pesan + visual berbeda kasih signal
+                    // ke user bahwa data ada, tapi terfilter habis.
+                    $hasFilter = $statusFilter !== '' || $serviceFilter !== '' || $userFilter !== '' || $search !== '';
+                @endphp
                 <tr>
-                    <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-neutral-400">
-                        Belum ada sync job.
+                    <td colspan="8">
+                        @if ($hasFilter)
+                            <x-nawasara-ui::empty-state
+                                icon="lucide-search-x"
+                                title="Tidak ada match dengan filter"
+                                description="Coba ubah filter atau hapus salah satu chip di atas."
+                                variant="filter"
+                                inline />
+                        @else
+                            <x-nawasara-ui::empty-state
+                                icon="lucide-database"
+                                title="Belum ada sync job"
+                                description="Sync job akan muncul di sini saat service melakukan sinkronisasi pertama."
+                                inline />
+                        @endif
                     </td>
                 </tr>
             @endforelse
