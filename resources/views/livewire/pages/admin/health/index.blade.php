@@ -132,7 +132,7 @@
         @endif
 
         <div class="mt-6 text-center text-xs text-gray-400 dark:text-neutral-500">
-            <a href="{{ url('admin/sync/jobs') }}" wire:navigate class="text-blue-600 hover:underline">
+            <a href="{{ url('admin/sync/jobs') }}" wire:navigate class="text-emerald-700 dark:text-emerald-400 hover:underline font-medium">
                 Lihat semua sync jobs →
             </a>
         </div>
