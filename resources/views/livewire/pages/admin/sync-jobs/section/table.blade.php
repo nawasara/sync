@@ -1,24 +1,24 @@
 <div>
-    {{-- Status summary cards — clickable filter --}}
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+    {{-- Status summary cards — clickable filter, compact mode for the
+         6-card row to stay scannable. --}}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
         @php
+            // Icon dropped in compact mode (colored dot replaces icon box).
             $cards = [
-                'queued' => ['label' => 'Queued', 'icon' => 'lucide-circle-dashed', 'color' => 'primary'],
-                'running' => ['label' => 'Running', 'icon' => 'lucide-loader', 'color' => 'info'],
-                'success' => ['label' => 'Success', 'icon' => 'lucide-circle-check', 'color' => 'success'],
-                'failed' => ['label' => 'Failed', 'icon' => 'lucide-circle-x', 'color' => 'danger'],
-                'conflict' => ['label' => 'Conflict', 'icon' => 'lucide-triangle-alert', 'color' => 'warning'],
-                'skipped' => ['label' => 'Skipped', 'icon' => 'lucide-skip-forward', 'color' => 'neutral'],
+                'queued' => ['label' => 'Queued', 'color' => 'primary'],
+                'running' => ['label' => 'Running', 'color' => 'info'],
+                'success' => ['label' => 'Success', 'color' => 'success'],
+                'failed' => ['label' => 'Failed', 'color' => 'danger'],
+                'conflict' => ['label' => 'Conflict', 'color' => 'warning'],
+                'skipped' => ['label' => 'Skipped', 'color' => 'neutral'],
             ];
         @endphp
         @foreach ($cards as $key => $cfg)
-            <x-nawasara-ui::stat-card
+            <x-nawasara-ui::stat-card compact
                 :label="$cfg['label']"
                 :value="$this->statusCounts[$key] ?? 0"
-                :icon="$cfg['icon']"
                 :color="$cfg['color']"
                 :active="$statusFilter === $key"
-                accent
                 wire:click="setStatusFilter('{{ $key }}')" />
         @endforeach
     </div>
