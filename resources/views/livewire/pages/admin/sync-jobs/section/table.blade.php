@@ -53,24 +53,24 @@
         <x-slot:table>
             @forelse ($this->jobs as $job)
                 <tr>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <span class="font-medium text-gray-800 dark:text-neutral-200">{{ $job->service }}</span>
                         @if ($job->instance)
                             <span class="text-xs text-gray-500 dark:text-neutral-400">/ {{ $job->instance }}</span>
                         @endif
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <div class="text-gray-800 dark:text-neutral-200">{{ $job->actionLabel() }}</div>
                         <div class="text-xs text-gray-400 font-mono">{{ $job->action }}</div>
                     </td>
-                    <td class="px-6 py-3 text-sm text-gray-600 dark:text-neutral-400 max-w-xs truncate">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-neutral-400 max-w-xs truncate">
                         @if ($job->target_id)
                             <span class="font-mono">{{ $job->target_id }}</span>
                         @else
                             <span class="text-gray-400">—</span>
                         @endif
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
                         @if ($job->triggeredByUser)
                             <div class="text-gray-700 dark:text-neutral-300">{{ $job->triggeredByUser->name }}</div>
                             <div class="text-xs text-gray-400 truncate max-w-[12rem]">{{ $job->triggeredByUser->email }}</div>
@@ -78,7 +78,7 @@
                             <span class="text-xs italic text-gray-400">system</span>
                         @endif
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
                         @php
                             // Map sync-job lifecycle status to badge colors.
                             // running stays indigo (mid-flight, not yet final)
@@ -101,18 +101,18 @@
                             <span class="ml-1 text-xs text-gray-500" title="Attempts">×{{ $job->attempts }}</span>
                         @endif
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-neutral-400 font-mono">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-neutral-400 font-mono">
                         @if ($job->duration_ms !== null)
                             {{ $job->duration_ms < 1000 ? $job->duration_ms.'ms' : round($job->duration_ms / 1000, 1).'s' }}
                         @else
                             —
                         @endif
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-neutral-400">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-neutral-400">
                         {{ $job->created_at->diffForHumans() }}
                         <div class="text-xs text-gray-400">{{ $job->trigger_source }}</div>
                     </td>
-                    <td class="px-6 py-3 whitespace-nowrap text-sm text-right">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
                         <x-nawasara-ui::dropdown-menu-action :id="$job->id" :items="array_filter([
                             ['type' => 'click', 'label' => 'Detail', 'wire:click' => 'openDetail('.$job->id.')', 'modal' => 'sync-job-detail', 'icon' => 'lucide-eye', 'permission' => 'sync.job.view'],
                             $job->isRetryable() ? ['type' => 'click', 'label' => 'Retry', 'wire:click' => 'retry('.$job->id.')', 'icon' => 'lucide-refresh-cw', 'permission' => 'sync.job.manage'] : null,
