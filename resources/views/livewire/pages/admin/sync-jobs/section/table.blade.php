@@ -80,19 +80,23 @@
                     </td>
                     <td class="px-6 py-3 whitespace-nowrap text-sm">
                         @php
-                            $statusClass = match ($job->status) {
-                                'queued' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-                                'running' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 animate-pulse',
-                                'success' => 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-                                'failed' => 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-                                'conflict' => 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-                                'skipped' => 'bg-gray-100 text-gray-700 dark:bg-neutral-700 dark:text-neutral-400',
-                                default => 'bg-gray-100 text-gray-600',
+                            // Map sync-job lifecycle status to badge colors.
+                            // running stays indigo (mid-flight, not yet final)
+                            // and gets animate-pulse to telegraph live work.
+                            $statusColor = match ($job->status) {
+                                'queued' => 'blue',
+                                'running' => 'indigo',
+                                'success' => 'success',
+                                'failed' => 'danger',
+                                'conflict' => 'warning',
+                                'skipped' => 'neutral',
+                                default => 'neutral',
                             };
                         @endphp
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
+                        <x-nawasara-ui::badge :color="$statusColor"
+                            @class(['animate-pulse' => $job->status === 'running'])>
                             {{ ucfirst($job->status) }}
-                        </span>
+                        </x-nawasara-ui::badge>
                         @if ($job->attempts > 1)
                             <span class="ml-1 text-xs text-gray-500" title="Attempts">×{{ $job->attempts }}</span>
                         @endif
