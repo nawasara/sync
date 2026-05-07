@@ -8,10 +8,11 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Nawasara\Sync\Models\SyncJob;
 use Nawasara\Ui\Livewire\Concerns\HasBrowserToast;
+use Nawasara\Ui\Livewire\Concerns\HasTimeWindow;
 
 class Table extends Component
 {
-    use HasBrowserToast, WithPagination;
+    use HasBrowserToast, HasTimeWindow, WithPagination;
 
     public string $serviceFilter = '';
     public string $statusFilter = '';
@@ -42,6 +43,10 @@ class Table extends Component
     {
         return SyncJob::query()
             ->with('triggeredByUser:id,name,email')
+            // Filter by created_at — that's when the job was QUEUED, which is
+            // the most useful time anchor for ops review (started_at is null
+            // for not-yet-running jobs and would hide the queue).
+            ->tap(fn ($q) => $this->applyTimeWindow($q, 'created_at'))
             ->when($this->serviceFilter, fn ($q) => $q->where('service', $this->serviceFilter))
             ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
             ->when($this->userFilter !== '', function ($q) {
@@ -91,6 +96,10 @@ class Table extends Component
     #[Computed]
     public function services(): array
     {
+        // Service options stay global (not time-windowed) so users can switch
+        // window without losing the picker - showing only services seen in
+        // the last 7 days could leave the Service filter empty after a
+        // sync hiatus, which is more confusing than helpful.
         return SyncJob::query()
             ->select('service')
             ->distinct()
@@ -103,7 +112,10 @@ class Table extends Component
     #[Computed]
     public function statusCounts(): array
     {
+        // Counts SHOULD match the visible time window — otherwise a user
+        // looking at "today" would see the all-time pending count and panic.
         return SyncJob::query()
+            ->tap(fn ($q) => $this->applyTimeWindow($q, 'created_at'))
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')

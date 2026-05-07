@@ -23,6 +23,14 @@
         @endforeach
     </div>
 
+    {{-- Time-window selector — segmented preset (Hari ini/7d/30d/Custom)
+         scoped to created_at (job-queued time). Default 7 days; the status
+         summary cards and visible job list both narrow to this window so
+         the numbers a user reads always match what they're scrolling. --}}
+    <div class="mb-3">
+        <x-nawasara-ui::time-window :window="$window" :from="$from" :to="$to" />
+    </div>
+
     <x-nawasara-ui::filter-bar searchPlaceholder="Cari target, action, error..." searchModel="search">
         <x-nawasara-ui::filter-dropdown label="Service" model="serviceFilter" :items="$this->services" />
         <x-nawasara-ui::filter-dropdown label="User" model="userFilter" :items="$this->userOptions" />
@@ -114,8 +122,9 @@
                 @php
                     // Detect filter active: kalau ada filter dipasang, empty state-nya
                     // 'no match', bukan 'no data'. Pesan + visual berbeda kasih signal
-                    // ke user bahwa data ada, tapi terfilter habis.
-                    $hasFilter = $statusFilter !== '' || $serviceFilter !== '' || $userFilter !== '' || $search !== '';
+                    // ke user bahwa data ada, tapi terfilter habis. Time window juga
+                    // dihitung sebagai filter — default 7d-only could legit be empty.
+                    $hasFilter = $statusFilter !== '' || $serviceFilter !== '' || $userFilter !== '' || $search !== '' || $window !== '7d' || $from || $to;
                 @endphp
                 <tr>
                     <td colspan="8">
@@ -123,14 +132,14 @@
                             <x-nawasara-ui::empty-state
                                 icon="lucide-search-x"
                                 title="Tidak ada match dengan filter"
-                                description="Coba ubah filter atau hapus salah satu chip di atas."
+                                description="Coba ubah periode/filter atau hapus salah satu chip di atas."
                                 variant="filter"
                                 inline />
                         @else
                             <x-nawasara-ui::empty-state
                                 icon="lucide-database"
-                                title="Belum ada sync job"
-                                description="Sync job akan muncul di sini saat service melakukan sinkronisasi pertama."
+                                title="Belum ada sync job 7 hari terakhir"
+                                description="Pilih periode lebih panjang atau Custom untuk melihat data lebih lama."
                                 inline />
                         @endif
                     </td>
