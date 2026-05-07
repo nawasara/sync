@@ -23,15 +23,13 @@
         @endforeach
     </div>
 
-    {{-- Time-window selector — segmented preset (Hari ini/7d/30d/Custom)
-         scoped to created_at (job-queued time). Default 7 days; the status
-         summary cards and visible job list both narrow to this window so
-         the numbers a user reads always match what they're scrolling. --}}
-    <div class="mb-3">
-        <x-nawasara-ui::time-window :window="$window" :from="$from" :to="$to" />
-    </div>
-
+    {{-- Time window inline at the head of the filter row. Scoped to
+         created_at (job-queued time); the status summary cards above and
+         the visible job list both narrow to this window so the numbers a
+         user reads always match what they're scrolling. --}}
     <x-nawasara-ui::filter-bar searchPlaceholder="Cari target, action, error..." searchModel="search">
+        <x-nawasara-ui::time-window :window="$window" :from="$from" :to="$to" />
+
         <x-nawasara-ui::filter-dropdown label="Service" model="serviceFilter" :items="$this->services" />
         <x-nawasara-ui::filter-dropdown label="User" model="userFilter" :items="$this->userOptions" />
 
