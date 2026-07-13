@@ -13,6 +13,7 @@ return [
         'whm_sync' => 'whm-sync',         // WHM scheduled sync
         'cloudflare_sync' => 'cf-sync',
         'keycloak_sync' => 'kc-sync',
+        'secscan_sync' => 'secscan-scan', // secscan HTTP/WP scans (long-running, high timeout worker)
     ],
 
     /*
