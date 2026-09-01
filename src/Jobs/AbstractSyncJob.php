@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Nawasara\Sync\Events\SyncJobFinalFailed;
+use Nawasara\Sync\Events\SyncJobSucceeded;
 use Nawasara\Sync\Models\SyncJob;
 
 /**
@@ -139,6 +140,13 @@ abstract class AbstractSyncJob implements ShouldQueue
 
             $result = $this->execute();
             $tracker->markSuccess(is_array($result) ? $result : null);
+
+            // Dipancarkan DI SINI, bukan di dalam onSuccess(): hook itu boleh
+            // ditimpa subclass, dan subclass yang lupa memanggil parent akan
+            // diam-diam menghentikan pemulihan alert — persis jenis kegagalan
+            // yang tidak terlihat sampai kotak masuk penuh lagi.
+            SyncJobSucceeded::dispatch($tracker);
+
             $this->onSuccess($tracker);
         } catch (\Throwable $e) {
             // Re-throw so Laravel queue can retry per $tries. Mark failed only on final attempt.
