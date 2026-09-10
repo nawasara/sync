@@ -40,6 +40,9 @@
             "providers": [
                 "Nawasara\\Sync\\SyncServiceProvider"
             ]
+        },
+        "branch-alias": {
+            "dev-main": "0.2.x-dev"
         }
     },
     "minimum-stability": "dev",
