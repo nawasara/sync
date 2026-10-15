@@ -4,8 +4,11 @@ namespace Nawasara\Sync\Livewire\Admin\SyncJobs\Section;
 
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Nawasara\AuthPrimitives\Attributes\RequiresSudo;
+use Nawasara\AuthPrimitives\Traits\WithSudo;
 use Nawasara\Sync\Models\SyncJob;
 use Nawasara\Ui\Livewire\Concerns\HasBrowserToast;
 use Nawasara\Ui\Livewire\Concerns\HasTimeWindow;
@@ -13,12 +16,15 @@ use Nawasara\Ui\Livewire\Concerns\HasTimeWindow;
 class Table extends Component
 {
     use HasBrowserToast, HasTimeWindow, WithPagination;
+    use WithSudo;
 
     public string $serviceFilter = '';
     public string $statusFilter = '';
     public string $userFilter = '';
     public string $search = '';
 
+    // Audit keamanan 15 Oktober 2026: hanya diisi server lewat openDetail().
+    #[Locked]
     public ?int $detailId = null;
 
     protected function queryString(): array
@@ -174,6 +180,9 @@ class Table extends Component
         $this->toastSuccess('Job di-mark untuk retry. Worker akan ambil saat polling berikutnya.');
     }
 
+    // Audit keamanan 15 Oktober 2026 (S6): menghapus jejak sinkronisasi
+    // berarti menghapus bukti audit, jadi wajib sudo (AGENTS.md §6).
+    #[RequiresSudo(reason: 'menghapus log sync job')]
     public function delete(int $id): void
     {
         Gate::authorize('sync.job.manage');
